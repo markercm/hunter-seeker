@@ -5,6 +5,7 @@ A local web application for tracking job applications built with Go, SQLite, and
 ## Features
 
 - **Track Job Applications**: Record date applied, job title, company, status, job URL, and notes
+- **CSV Import**: Bulk import job applications from CSV files with flexible date format support
 - **Status Management**: Predefined statuses (Applied, In Review, Interview, etc.) with easy updates
 - **Visual Dashboard**: Clean interface with status filtering and application statistics
 - **Local-First**: Runs entirely on your machine with SQLite database
@@ -93,6 +94,33 @@ Your job application data is stored in a SQLite database that persists in the `.
    - **Notes**: Any additional information (optional)
 3. Click "Add Application" to save
 
+### Importing from CSV
+
+1. Click "Import CSV" from the dashboard or navigation
+2. Download the sample template if needed
+3. Prepare your CSV file with the following columns (in order):
+   - **Date Applied** (required): Date you applied for the job
+   - **Job Title** (required): Position title
+   - **Company** (required): Company name
+   - **Status** (optional): Application status (defaults to "Applied")
+   - **Job URL** (optional): Link to job posting
+   - **Notes** (optional): Additional notes
+4. Upload your CSV file and review the import results
+
+#### Supported Date Formats
+- ISO format: `2024-01-15` (recommended)
+- US format: `01/15/2024` or `1/15/2024`
+- European format: `15/01/2024` or `15/1/2024`
+- Month names: `Jan 15 2024`, `January 15, 2024`, `Feb 20 2024`
+- Various other formats are automatically detected
+
+#### CSV Import Tips
+- Include headers in the first row (they will be automatically detected)
+- Empty rows are skipped automatically
+- If status is empty, it defaults to "Applied"
+- Maximum file size: 10MB
+- Use quotes around fields containing commas
+
 ### Updating Application Status
 
 1. From the dashboard, click "Edit" on any application
@@ -132,6 +160,19 @@ The application comes with predefined statuses:
 - **No Response**: No response from the company
 
 You can use any of these statuses or mix with custom ones.
+
+## CSV Import Format
+
+For bulk importing job applications, use a CSV file with the following structure:
+
+```csv
+Date Applied,Job Title,Company,Status,Job URL,Notes
+2024-01-15,Senior Software Engineer,TechCorp,Applied,https://techcorp.com/jobs/123,Applied through website
+2024-01-20,Full Stack Developer,StartupCo,In Review,https://startupco.com/careers,Remote position
+01/25/2024,Backend Engineer,BigTech Inc,Interview,https://bigtech.com/jobs,Phone screen scheduled
+```
+
+Download a sample template from the Import CSV page in the application.
 
 ## Configuration
 

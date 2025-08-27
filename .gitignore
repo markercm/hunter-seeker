@@ -8,10 +8,10 @@
 # Build artifacts and binaries
 /bin/
 bin/
-hunter-seeker
-server
-sample-data
-debug
+/hunter-seeker
+/server
+/sample-data
+/debug
 
 # Test binary, built with `go test -c`
 *.test
@@ -74,5 +74,4 @@ add-test-data
 test_filter.html
 
 # Additional binary names that might be generated
-main
-cmd
+/main
