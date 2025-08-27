@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Import Results - Hunter-Seeker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        nav a:hover {
+            background-color: #34495e;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background: #2980b9;
+        }
+
+        .btn-success {
+            background: #27ae60;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #155724;
+        }
+
+        .error-box {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #721c24;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #856404;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #3498db;
+        }
+
+        .stat-card.success {
+            border-left-color: #27ae60;
+        }
+
+        .stat-card.error {
+            border-left-color: #e74c3c;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-number.success {
+            color: #27ae60;
+        }
+
+        .stat-number.error {
+            color: #e74c3c;
+        }
+
+        .stat-number.total {
+            color: #3498db;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+
+        .error-list {
+            max-height: 300px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+        }
+
+        .error-item {
+            margin-bottom: 10px;
+            padding: 8px;
+            background: #fff;
+            border-left: 3px solid #e74c3c;
+            border-radius: 2px;
+        }
+
+        .error-item:last-child {
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            nav {
+                text-align: center;
+            }
+
+            nav a {
+                margin: 0 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">🎯 Hunter-Seeker</div>
+            <nav>
+                <a href="/">Dashboard</a>
+                <a href="/add">Add Application</a>
+                <a href="/import-csv">Import CSV</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="card">
+            <h2 style="margin-bottom: 20px;">📊 CSV Import Results</h2>
+
+            <!-- Import Statistics -->
+            <div class="stats-grid">
+                <div class="stat-card total">
+                    <div class="stat-number total">{{.TotalRows}}</div>
+                    <div class="stat-label">Total Rows Processed</div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-number success">{{.SuccessCount}}</div>
+                    <div class="stat-label">Successfully Imported</div>
+                </div>
+                <div class="stat-card error">
+                    <div class="stat-number error">{{.ErrorCount}}</div>
+                    <div class="stat-label">Failed to Import</div>
+                </div>
+            </div>
+
+            <!-- Success Message -->
+            {{if gt .SuccessCount 0}}
+            <div class="success-box">
+                <h3 style="margin-bottom: 10px;">✅ Import Completed</h3>
+                <p>Successfully imported <strong>{{.SuccessCount}}</strong> job application(s) from your CSV file.</p>
+            </div>
+            {{end}}
+
+            <!-- Error Summary -->
+            {{if gt .ErrorCount 0}}
+            <div class="error-box">
+                <h3 style="margin-bottom: 10px;">❌ Import Errors</h3>
+                <p><strong>{{.ErrorCount}}</p></strong> row(s) could not be imported due to errors. Please review the details below and fix the issues in your CSV file if needed.</p>
+            </div>
+
+            <!-- Error Details -->
+            <div style="margin-top: 20px;">
+                <h3 style="margin-bottom: 15px;">🔍 Error Details</h3>
+                <div class="error-list">
+                    {{range .Errors}}
+                    <div class="error-item">{{.}}</div>
+                    {{end}}
+                </div>
+            </div>
+            {{end}}
+
+            <!-- No Errors -->
+            {{if eq .ErrorCount 0}}
+            {{if gt .SuccessCount 0}}
+            <div class="success-box">
+                <h3 style="margin-bottom: 10px;">🎉 Perfect Import!</h3>
+                <p>All rows from your CSV file were successfully imported without any errors.</p>
+            </div>
+            {{else}}
+            <div class="warning-box">
+                <h3 style="margin-bottom: 10px;">⚠️ No Data Imported</h3>
+                <p>No job applications were imported. This could be because:</p>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>The CSV file was empty</li>
+                    <li>All rows had formatting errors</li>
+                    <li>Only header row was present</li>
+                </ul>
+            </div>
+            {{end}}
+            {{end}}
+
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 10px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e9ecef;">
+                <a href="/" class="btn btn-success">📋 View Dashboard</a>
+                <a href="/import-csv" class="btn">📤 Import Another CSV</a>
+                {{if gt .ErrorCount 0}}
+                <a href="/import-csv" class="btn" style="background: #f39c12;">🔧 Fix and Re-import</a>
+                {{end}}
+            </div>
+
+            <!-- Tips Section -->
+            {{if gt .ErrorCount 0}}
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e9ecef;">
+                <h3 style="margin-bottom: 15px;">💡 Tips to Fix Import Errors</h3>
+                <ul style="margin-left: 20px;">
+                    <li><strong>Date Format Issues:</strong> Use YYYY-MM-DD format (e.g., 2024-01-15) for best compatibility</li>
+                    <li><strong>Missing Required Fields:</strong> Ensure Date Applied, Job Title, and Company are filled in every row</li>
+                    <li><strong>Invalid Status Values:</strong> Use one of the predefined status values or leave empty for "Applied"</li>
+                    <li><strong>Special Characters:</strong> Avoid commas in fields unless the entire field is quoted</li>
+                    <li><strong>Empty Rows:</strong> Remove completely empty rows from your CSV</li>
+                </ul>
+            </div>
+            {{end}}
+        </div>
+    </main>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-focus on the main action button
+        const viewDashboardBtn = document.querySelector('a[href="/"]');
+        if (viewDashboardBtn) {
+            viewDashboardBtn.focus();
+        }
+    });
+    </script>
+</body>
+</html>
