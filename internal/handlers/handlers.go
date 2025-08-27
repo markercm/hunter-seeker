@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -358,4 +359,220 @@ func (h *Handler) StatsHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Error encoding JSON: %v", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 	}
+}
+
+// ImportCSVHandler renders the CSV import form
+func (h *Handler) ImportCSVHandler(w http.ResponseWriter, r *http.Request) {
+	data := struct {
+		Statuses []string
+	}{
+		Statuses: models.GetCommonStatuses(),
+	}
+
+	if err := h.templates.ExecuteTemplate(w, "import_csv.html", data); err != nil {
+		log.Printf("Error executing template: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	}
+}
+
+// ProcessCSVHandler processes uploaded CSV file and creates job applications
+func (h *Handler) ProcessCSVHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Parse multipart form (10MB max)
+	if err := r.ParseMultipartForm(10 << 20); err != nil {
+		http.Error(w, "Failed to parse form", http.StatusBadRequest)
+		return
+	}
+
+	// Get the file from form
+	file, _, err := r.FormFile("csv_file")
+	if err != nil {
+		http.Error(w, "Failed to get CSV file", http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	// Parse CSV
+	reader := csv.NewReader(file)
+	records, err := reader.ReadAll()
+	if err != nil {
+		http.Error(w, "Failed to parse CSV file", http.StatusBadRequest)
+		return
+	}
+
+	if len(records) == 0 {
+		http.Error(w, "CSV file is empty", http.StatusBadRequest)
+		return
+	}
+
+	var successCount, errorCount int
+	var errors []string
+
+	// Skip header row if present
+	startIdx := 0
+	if len(records) > 0 && isHeaderRow(records[0]) {
+		startIdx = 1
+	}
+
+	// Process each row
+	for i := startIdx; i < len(records); i++ {
+		record := records[i]
+
+		// Skip empty rows
+		if len(record) == 0 || (len(record) == 1 && strings.TrimSpace(record[0]) == "") {
+			continue
+		}
+
+		job, err := parseCSVRecord(record)
+		if err != nil {
+			errorCount++
+			errors = append(errors, fmt.Sprintf("Row %d: %v", i+1, err))
+			continue
+		}
+
+		if err := h.db.CreateJobApplication(job); err != nil {
+			errorCount++
+			errors = append(errors, fmt.Sprintf("Row %d: Failed to save %s at %s: %v", i+1, job.JobTitle, job.Company, err))
+		} else {
+			successCount++
+		}
+	}
+
+	// Prepare response data
+	data := struct {
+		SuccessCount int
+		ErrorCount   int
+		Errors       []string
+		TotalRows    int
+	}{
+		SuccessCount: successCount,
+		ErrorCount:   errorCount,
+		Errors:       errors,
+		TotalRows:    len(records) - startIdx,
+	}
+
+	if err := h.templates.ExecuteTemplate(w, "import_result.html", data); err != nil {
+		log.Printf("Error executing template: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	}
+}
+
+// isHeaderRow checks if the first row looks like a header
+func isHeaderRow(record []string) bool {
+	if len(record) == 0 {
+		return false
+	}
+
+	// Check for common header keywords
+	firstCol := strings.ToLower(strings.TrimSpace(record[0]))
+	headerKeywords := []string{"date", "job", "title", "company", "position", "role"}
+
+	for _, keyword := range headerKeywords {
+		if strings.Contains(firstCol, keyword) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// parseCSVRecord converts a CSV record to a JobApplication
+func parseCSVRecord(record []string) (*models.JobApplication, error) {
+	if len(record) < 3 {
+		return nil, fmt.Errorf("insufficient columns (need at least: date_applied, job_title, company)")
+	}
+
+	// Parse date (required)
+	dateStr := strings.TrimSpace(record[0])
+	dateApplied, err := parseDate(dateStr)
+	if err != nil {
+		return nil, fmt.Errorf("invalid date format '%s': %v", dateStr, err)
+	}
+
+	// Job title (required)
+	jobTitle := strings.TrimSpace(record[1])
+	if jobTitle == "" {
+		return nil, fmt.Errorf("job title is required")
+	}
+
+	// Company (required)
+	company := strings.TrimSpace(record[2])
+	if company == "" {
+		return nil, fmt.Errorf("company is required")
+	}
+
+	job := &models.JobApplication{
+		DateApplied: dateApplied,
+		JobTitle:    jobTitle,
+		Company:     company,
+		Status:      models.StatusApplied, // Default status
+	}
+
+	// Status (optional, column 4)
+	if len(record) > 3 {
+		status := strings.TrimSpace(record[3])
+		if status != "" {
+			job.Status = status
+		}
+	}
+
+	// Job URL (optional, column 5)
+	if len(record) > 4 {
+		job.JobURL = strings.TrimSpace(record[4])
+	}
+
+	// Notes (optional, column 6)
+	if len(record) > 5 {
+		job.Notes = strings.TrimSpace(record[5])
+	}
+
+	return job, nil
+}
+
+// parseDate attempts to parse various date formats
+func parseDate(dateStr string) (time.Time, error) {
+	if dateStr == "" {
+		return time.Time{}, fmt.Errorf("date is required")
+	}
+
+	// Try common date formats
+	formats := []string{
+		"2006-01-02",      // ISO format (YYYY-MM-DD)
+		"01/02/2006",      // US format (MM/DD/YYYY)
+		"1/2/2006",        // US format without leading zeros
+		"02/01/2006",      // Some other format (DD/MM/YYYY)
+		"2/1/2006",        // Without leading zeros
+		"2006/01/02",      // YYYY/MM/DD
+		"2006/1/2",        // YYYY/M/D
+		"Jan 2, 2006",     // Month name format
+		"January 2, 2006", // Full month name
+		"2 Jan 2006",      // European style
+		"2006-1-2",        // ISO without leading zeros
+		"Jan 2 2006",      // Month name without comma
+		"January 2 2006",  // Full month name without comma
+		"Feb 2 2006",      // Short month name without comma
+		"Feb 20 2006",     // Short month name without comma (actual example)
+		"March 2 2006",    // Month name variations
+		"Apr 2 2006",
+		"May 2 2006",
+		"Jun 2 2006",
+		"Jul 2 2006",
+		"Aug 2 2006",
+		"Sep 2 2006",
+		"Oct 2 2006",
+		"Nov 2 2006",
+		"Dec 2 2006",
+	}
+
+	for _, format := range formats {
+		if date, err := time.Parse(format, dateStr); err == nil {
+			return date, nil
+		}
+	}
+
+	return time.Time{}, fmt.Errorf("unrecognized date format")
 }

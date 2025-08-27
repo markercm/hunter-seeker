@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Import CSV - Hunter-Seeker</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family:
+                    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                    Oxygen, Ubuntu, Cantarell, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                background-color: #f5f5f5;
+            }
+
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+
+            header {
+                background: #2c3e50;
+                color: white;
+                padding: 1rem 0;
+                margin-bottom: 2rem;
+            }
+
+            .header-content {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 0 20px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .logo {
+                font-size: 1.5rem;
+                font-weight: bold;
+            }
+
+            nav a {
+                color: white;
+                text-decoration: none;
+                margin-left: 20px;
+                padding: 8px 16px;
+                border-radius: 4px;
+                transition: background-color 0.3s;
+            }
+
+            nav a:hover {
+                background-color: #34495e;
+            }
+
+            .btn {
+                display: inline-block;
+                padding: 10px 20px;
+                background: #3498db;
+                color: white;
+                text-decoration: none;
+                border-radius: 4px;
+                border: none;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+
+            .btn:hover {
+                background: #2980b9;
+            }
+
+            .btn-success {
+                background: #27ae60;
+            }
+
+            .btn-success:hover {
+                background: #229954;
+            }
+
+            .btn-danger {
+                background: #e74c3c;
+            }
+
+            .form-group {
+                margin-bottom: 1rem;
+            }
+
+            label {
+                display: block;
+                margin-bottom: 5px;
+                font-weight: bold;
+            }
+
+            input,
+            select {
+                width: 100%;
+                padding: 8px 12px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                font-size: 14px;
+            }
+
+            .card {
+                background: white;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+
+            .info-box {
+                background: #e8f4fd;
+                border: 1px solid #bee5eb;
+                border-radius: 4px;
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+
+            .warning-box {
+                background: #fff3cd;
+                border: 1px solid #ffeaa7;
+                border-radius: 4px;
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+
+            .csv-format {
+                background: #f8f9fa;
+                border: 1px solid #e9ecef;
+                border-radius: 4px;
+                padding: 15px;
+                font-family: "Courier New", monospace;
+                font-size: 12px;
+                overflow-x: auto;
+            }
+
+            .format-example {
+                margin-top: 10px;
+            }
+
+            ul {
+                margin-left: 20px;
+                margin-bottom: 15px;
+            }
+
+            @media (max-width: 768px) {
+                .header-content {
+                    flex-direction: column;
+                    gap: 10px;
+                }
+
+                nav {
+                    text-align: center;
+                }
+
+                nav a {
+                    margin: 0 10px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <div class="header-content">
+                <div class="logo">🎯 Hunter-Seeker</div>
+                <nav>
+                    <a href="/">Dashboard</a>
+                    <a href="/add">Add Application</a>
+                    <a href="/import-csv">Import CSV</a>
+                </nav>
+            </div>
+        </header>
+
+        <main class="container">
+            <div class="card">
+                <h2 style="margin-bottom: 20px">
+                    Import Job Applications from CSV
+                </h2>
+
+                <div class="info-box">
+                    <h3 style="margin-bottom: 10px">
+                        📋 CSV Format Requirements
+                    </h3>
+                    <p>
+                        Your CSV file should contain the following columns in
+                        order:
+                    </p>
+                    <ul>
+                        <li>
+                            <strong>Date Applied</strong> (required) - Date you
+                            applied for the job
+                        </li>
+                        <li>
+                            <strong>Job Title</strong> (required) - Position
+                            title
+                        </li>
+                        <li>
+                            <strong>Company</strong> (required) - Company name
+                        </li>
+                        <li>
+                            <strong>Status</strong> (optional) - Application
+                            status
+                        </li>
+                        <li>
+                            <strong>Job URL</strong> (optional) - Link to job
+                            posting
+                        </li>
+                        <li>
+                            <strong>Notes</strong> (optional) - Additional notes
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="warning-box">
+                    <h3 style="margin-bottom: 10px">⚠️ Important Notes</h3>
+                    <ul>
+                        <li>
+                            First row can be headers (they will be automatically
+                            detected and skipped)
+                        </li>
+                        <li>
+                            Date formats supported: YYYY-MM-DD, MM/DD/YYYY,
+                            DD/MM/YYYY, and more
+                        </li>
+                        <li>
+                            If Status is empty, it will default to "Applied"
+                        </li>
+                        <li>Empty rows will be skipped</li>
+                        <li>Maximum file size: 10MB</li>
+                    </ul>
+                </div>
+
+                <div class="format-example">
+                    <h3 style="margin-bottom: 10px">📁 Example CSV Format</h3>
+                    <div style="margin-bottom: 15px">
+                        <a
+                            href="/static/sample_template.csv"
+                            download="job_applications_template.csv"
+                            class="btn"
+                            style="background: #27ae60"
+                            >⬇️ Download Sample Template</a
+                        >
+                    </div>
+                    <div class="csv-format">
+                        Date Applied,Job Title,Company,Status,Job URL,Notes
+                        2024-01-15,Software
+                        Engineer,TechCorp,Applied,https://techcorp.com/jobs/123,Applied
+                        through website 2024-01-20,Full Stack
+                        Developer,StartupCo,In
+                        Review,https://startupco.com/careers,Remote position
+                        01/25/2024,Backend Engineer,BigTech
+                        Inc,Interview,https://bigtech.com/jobs,Phone screen next
+                        week
+                    </div>
+                </div>
+
+                <form
+                    method="POST"
+                    action="/process-csv"
+                    enctype="multipart/form-data"
+                    style="margin-top: 30px"
+                >
+                    <div class="form-group">
+                        <label for="csv_file">Select CSV File *</label>
+                        <input
+                            type="file"
+                            id="csv_file"
+                            name="csv_file"
+                            accept=".csv,.txt"
+                            required
+                        />
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-top: 20px">
+                        <button type="submit" class="btn btn-success">
+                            📤 Import CSV
+                        </button>
+                        <a href="/" class="btn">Cancel</a>
+                    </div>
+                </form>
+
+                <div
+                    style="
+                        margin-top: 30px;
+                        padding-top: 20px;
+                        border-top: 1px solid #e9ecef;
+                    "
+                >
+                    <h3 style="margin-bottom: 15px">
+                        💡 Tips for Best Results
+                    </h3>
+                    <ul>
+                        <li>Use consistent date formats throughout your CSV</li>
+                        <li>
+                            Avoid special characters in company names that might
+                            break parsing
+                        </li>
+                        <li>Keep job titles descriptive but concise</li>
+                        <li>
+                            Valid status values: {{range $i, $status :=
+                            .Statuses}}{{if $i}}, {{end}}"{{$status}}"{{end}}
+                        </li>
+                        <li>
+                            You can always edit imported applications
+                            individually after import
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const fileInput = document.getElementById("csv_file");
+
+                fileInput.addEventListener("change", function (e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        if (file.size > 10 * 1024 * 1024) {
+                            alert("File size must be less than 10MB");
+                            e.target.value = "";
+                            return;
+                        }
+
+                        if (
+                            !file.name.toLowerCase().endsWith(".csv") &&
+                            !file.name.toLowerCase().endsWith(".txt")
+                        ) {
+                            alert("Please select a CSV file");
+                            e.target.value = "";
+                            return;
+                        }
+                    }
+                });
+
+                // Focus on file input
+                fileInput.focus();
+            });
+        </script>
+    </body>
+</html>
