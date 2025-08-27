@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>
+            {{block "title" .}}Hunter-Seeker - Job Application Tracker{{end}}
+        </title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family:
+                    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                    Oxygen, Ubuntu, Cantarell, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                background-color: #f5f5f5;
+            }
+
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+
+            header {
+                background: #2c3e50;
+                color: white;
+                padding: 1rem 0;
+                margin-bottom: 2rem;
+            }
+
+            .header-content {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 0 20px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .logo {
+                font-size: 1.5rem;
+                font-weight: bold;
+            }
+
+            nav a {
+                color: white;
+                text-decoration: none;
+                margin-left: 20px;
+                padding: 8px 16px;
+                border-radius: 4px;
+                transition: background-color 0.3s;
+            }
+
+            nav a:hover {
+                background-color: #34495e;
+            }
+
+            .btn {
+                display: inline-block;
+                padding: 10px 20px;
+                background: #3498db;
+                color: white;
+                text-decoration: none;
+                border-radius: 4px;
+                border: none;
+                cursor: pointer;
+                transition: background-color 0.3s;
+                font-size: 14px;
+                font-family: inherit;
+                line-height: 1;
+                text-align: center;
+                vertical-align: middle;
+                box-sizing: border-box;
+                min-width: 80px;
+            }
+
+            .btn:hover {
+                background: #2980b9;
+            }
+
+            .btn-danger {
+                background: #e74c3c;
+            }
+
+            .btn-danger:hover {
+                background: #c0392b;
+            }
+
+            .btn-success {
+                background: #27ae60;
+            }
+
+            .btn-success:hover {
+                background: #229954;
+            }
+
+            .form-group {
+                margin-bottom: 1rem;
+            }
+
+            label {
+                display: block;
+                margin-bottom: 5px;
+                font-weight: bold;
+            }
+
+            input,
+            select,
+            textarea {
+                width: 100%;
+                padding: 8px 12px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                font-size: 14px;
+            }
+
+            textarea {
+                height: 100px;
+                resize: vertical;
+            }
+
+            .card {
+                background: white;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+
+            .status-badge {
+                display: inline-block;
+                padding: 4px 8px;
+                border-radius: 12px;
+                font-size: 12px;
+                font-weight: bold;
+                text-transform: uppercase;
+            }
+
+            .status-applied {
+                background: #3498db;
+                color: white;
+            }
+            .status-in-review {
+                background: #f39c12;
+                color: white;
+            }
+            .status-phone-screen {
+                background: #9b59b6;
+                color: white;
+            }
+            .status-interview {
+                background: #e67e22;
+                color: white;
+            }
+            .status-technical-test {
+                background: #8e44ad;
+                color: white;
+            }
+            .status-offer {
+                background: #27ae60;
+                color: white;
+            }
+            .status-rejected {
+                background: #e74c3c;
+                color: white;
+            }
+            .status-withdrawn {
+                background: #95a5a6;
+                color: white;
+            }
+            .status-no-response {
+                background: #7f8c8d;
+                color: white;
+            }
+
+            .filter-bar {
+                background: white;
+                padding: 15px;
+                border-radius: 8px;
+                margin-bottom: 20px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .filter-buttons {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                align-items: center;
+            }
+
+            .filter-btn {
+                padding: 6px 12px;
+                border: 1px solid #ddd;
+                background: white;
+                border-radius: 20px;
+                text-decoration: none;
+                color: #333;
+                font-size: 14px;
+                transition: all 0.3s;
+            }
+
+            .filter-btn:hover,
+            .filter-btn.active {
+                background: #3498db;
+                color: white;
+                border-color: #3498db;
+            }
+
+            .stats {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 15px;
+                margin-bottom: 20px;
+            }
+
+            .stat-card {
+                background: white;
+                padding: 15px;
+                border-radius: 8px;
+                text-align: center;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .stat-number {
+                font-size: 2rem;
+                font-weight: bold;
+                color: #3498db;
+            }
+
+            .stat-label {
+                font-size: 0.9rem;
+                color: #7f8c8d;
+            }
+
+            .status-message {
+                margin-bottom: 20px;
+                padding: 12px;
+                border-radius: 4px;
+                font-weight: 500;
+            }
+
+            .status-message.error {
+                background-color: #f8d7da;
+                border: 1px solid #f5c6cb;
+                color: #721c24;
+            }
+
+            .status-message.success {
+                background-color: #d4edda;
+                border: 1px solid #c3e6cb;
+                color: #155724;
+            }
+
+            @media (max-width: 768px) {
+                .header-content {
+                    flex-direction: column;
+                    gap: 10px;
+                }
+
+                nav {
+                    text-align: center;
+                }
+
+                nav a {
+                    margin: 0 10px;
+                }
+
+                .filter-buttons {
+                    justify-content: center;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <div class="header-content">
+                <div class="logo">🎯 Hunter-Seeker</div>
+                <nav>
+                    <a href="/">Dashboard</a>
+                    <a href="/add">Add Application</a>
+                </nav>
+            </div>
+        </header>
+
+        <main class="container">{{block "content" .}}{{end}}</main>
+    </body>
+</html>
