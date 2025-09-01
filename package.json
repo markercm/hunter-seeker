@@ -1,0 +1,16 @@
+{
+  "name": "hunter-seeker",
+  "version": "1.0.0",
+  "description": "A local web application for tracking job applications",
+  "scripts": {
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "format:html": "prettier --write \"web/templates/*.html\"",
+    "format:css": "prettier --write \"web/static/*.css\"",
+    "format:json": "prettier --write \"*.json\""
+  },
+  "devDependencies": {
+    "prettier": "^3.0.0"
+  },
+  "private": true
+}

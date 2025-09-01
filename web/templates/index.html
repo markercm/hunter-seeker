@@ -127,6 +127,19 @@
             text-align: center;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+        .stat-card.total {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-left: 4px solid #5a67d8;
+        }
+        .stat-card.total .stat-number {
+            color: white;
+            font-size: 2.5rem;
+        }
+        .stat-card.total .stat-label {
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 600;
+        }
         .stat-number {
             font-size: 2rem;
             font-weight: bold;
@@ -170,6 +183,11 @@
         <main>
             <!-- Stats Section -->
             <div class="stats">
+                <!-- Total Applications Card -->
+                <div class="stat-card total">
+                    <div class="stat-number">{{.TotalCount}}</div>
+                    <div class="stat-label">Total Applications</div>
+                </div>
                 {{range $status, $count := .StatusCounts}}
                 <div class="stat-card">
                     <div class="stat-number">{{$count}}</div>
@@ -179,7 +197,7 @@
                 {{if not .StatusCounts}}
                 <div class="stat-card">
                     <div class="stat-number">0</div>
-                    <div class="stat-label">Total Applications</div>
+                    <div class="stat-label">No Applications Yet</div>
                 </div>
                 {{end}}
             </div>
