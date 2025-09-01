@@ -37,24 +37,24 @@ func New(dbPath string) (*DB, error) {
 // createTables creates the necessary database tables
 func (db *DB) createTables() error {
 	query := `
-	CREATE TABLE IF NOT EXISTS job_applications (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		date_applied DATE NOT NULL,
-		job_title TEXT NOT NULL,
-		company TEXT NOT NULL,
-		status TEXT NOT NULL DEFAULT 'Applied',
-		job_url TEXT,
-		notes TEXT,
-		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-	);
+  CREATE TABLE IF NOT EXISTS job_applications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date_applied DATE NOT NULL,
+    job_title TEXT NOT NULL,
+    company TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'Applied',
+    job_url TEXT,
+    notes TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
 
-	CREATE TRIGGER IF NOT EXISTS update_job_applications_updated_at
-	AFTER UPDATE ON job_applications
-	BEGIN
-		UPDATE job_applications SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
-	END;
-	`
+  CREATE TRIGGER IF NOT EXISTS update_job_applications_updated_at
+  AFTER UPDATE ON job_applications
+  BEGIN
+    UPDATE job_applications SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+  END;
+  `
 
 	_, err := db.conn.Exec(query)
 	return err
@@ -68,9 +68,9 @@ func (db *DB) Close() error {
 // CreateJobApplication creates a new job application
 func (db *DB) CreateJobApplication(job *models.JobApplication) error {
 	query := `
-	INSERT INTO job_applications (date_applied, job_title, company, status, job_url, notes)
-	VALUES (?, ?, ?, ?, ?, ?)
-	`
+  INSERT INTO job_applications (date_applied, job_title, company, status, job_url, notes)
+  VALUES (?, ?, ?, ?, ?, ?)
+  `
 
 	result, err := db.conn.Exec(query, job.DateApplied, job.JobTitle, job.Company, job.Status, job.JobURL, job.Notes)
 	if err != nil {
@@ -89,10 +89,10 @@ func (db *DB) CreateJobApplication(job *models.JobApplication) error {
 // GetJobApplication retrieves a job application by ID
 func (db *DB) GetJobApplication(id int) (*models.JobApplication, error) {
 	query := `
-	SELECT id, date_applied, job_title, company, status, job_url, notes, created_at, updated_at
-	FROM job_applications
-	WHERE id = ?
-	`
+  SELECT id, date_applied, job_title, company, status, job_url, notes, created_at, updated_at
+  FROM job_applications
+  WHERE id = ?
+  `
 
 	job := &models.JobApplication{}
 	err := db.conn.QueryRow(query, id).Scan(
@@ -113,10 +113,10 @@ func (db *DB) GetJobApplication(id int) (*models.JobApplication, error) {
 // GetAllJobApplications retrieves all job applications, ordered by date applied (newest first)
 func (db *DB) GetAllJobApplications() ([]*models.JobApplication, error) {
 	query := `
-	SELECT id, date_applied, job_title, company, status, job_url, notes, created_at, updated_at
-	FROM job_applications
-	ORDER BY date_applied DESC, created_at DESC
-	`
+  SELECT id, date_applied, job_title, company, status, job_url, notes, created_at, updated_at
+  FROM job_applications
+  ORDER BY date_applied DESC, created_at DESC
+  `
 
 	rows, err := db.conn.Query(query)
 	if err != nil {
@@ -143,10 +143,10 @@ func (db *DB) GetAllJobApplications() ([]*models.JobApplication, error) {
 // UpdateJobApplication updates an existing job application
 func (db *DB) UpdateJobApplication(job *models.JobApplication) error {
 	query := `
-	UPDATE job_applications
-	SET date_applied = ?, job_title = ?, company = ?, status = ?, job_url = ?, notes = ?, updated_at = CURRENT_TIMESTAMP
-	WHERE id = ?
-	`
+  UPDATE job_applications
+  SET date_applied = ?, job_title = ?, company = ?, status = ?, job_url = ?, notes = ?, updated_at = CURRENT_TIMESTAMP
+  WHERE id = ?
+  `
 
 	result, err := db.conn.Exec(query, job.DateApplied, job.JobTitle, job.Company, job.Status, job.JobURL, job.Notes, job.ID)
 	if err != nil {
@@ -189,11 +189,11 @@ func (db *DB) DeleteJobApplication(id int) error {
 // GetJobApplicationsByStatus retrieves job applications filtered by status
 func (db *DB) GetJobApplicationsByStatus(status string) ([]*models.JobApplication, error) {
 	query := `
-	SELECT id, date_applied, job_title, company, status, job_url, notes, created_at, updated_at
-	FROM job_applications
-	WHERE status = ?
-	ORDER BY date_applied DESC, created_at DESC
-	`
+  SELECT id, date_applied, job_title, company, status, job_url, notes, created_at, updated_at
+  FROM job_applications
+  WHERE status = ?
+  ORDER BY date_applied DESC, created_at DESC
+  `
 
 	rows, err := db.conn.Query(query, status)
 	if err != nil {
@@ -220,11 +220,11 @@ func (db *DB) GetJobApplicationsByStatus(status string) ([]*models.JobApplicatio
 // GetStatusCounts returns counts of job applications by status
 func (db *DB) GetStatusCounts() (map[string]int, error) {
 	query := `
-	SELECT status, COUNT(*) as count
-	FROM job_applications
-	GROUP BY status
-	ORDER BY count DESC
-	`
+  SELECT status, COUNT(*) as count
+  FROM job_applications
+  GROUP BY status
+  ORDER BY count DESC
+  `
 
 	rows, err := db.conn.Query(query)
 	if err != nil {
@@ -244,4 +244,17 @@ func (db *DB) GetStatusCounts() (map[string]int, error) {
 	}
 
 	return counts, nil
+}
+
+// GetTotalJobApplicationCount returns the total count of all job applications
+func (db *DB) GetTotalJobApplicationCount() (int, error) {
+	query := `SELECT COUNT(*) FROM job_applications`
+
+	var count int
+	err := db.conn.QueryRow(query).Scan(&count)
+	if err != nil {
+		return 0, fmt.Errorf("failed to query total job applications count: %w", err)
+	}
+
+	return count, nil
 }

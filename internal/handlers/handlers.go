@@ -66,6 +66,12 @@ func (h *Handler) HomeHandler(w http.ResponseWriter, r *http.Request) {
 		statusCounts = make(map[string]int)
 	}
 
+	totalCount, err := h.db.GetTotalJobApplicationCount()
+	if err != nil {
+		log.Printf("Error getting total count: %v", err)
+		totalCount = 0
+	}
+
 	// Handle status messages from delete operations
 	var statusMessage string
 	var statusType string
@@ -93,6 +99,7 @@ func (h *Handler) HomeHandler(w http.ResponseWriter, r *http.Request) {
 	data := struct {
 		Jobs          []*models.JobApplication
 		StatusCounts  map[string]int
+		TotalCount    int
 		Statuses      []string
 		CurrentFilter string
 		StatusMessage string
@@ -100,6 +107,7 @@ func (h *Handler) HomeHandler(w http.ResponseWriter, r *http.Request) {
 	}{
 		Jobs:          jobs,
 		StatusCounts:  statusCounts,
+		TotalCount:    totalCount,
 		Statuses:      models.GetCommonStatuses(),
 		CurrentFilter: "",
 		StatusMessage: statusMessage,
@@ -294,9 +302,16 @@ func (h *Handler) FilterHandler(w http.ResponseWriter, r *http.Request) {
 		statusCounts = make(map[string]int)
 	}
 
+	totalCount, err := h.db.GetTotalJobApplicationCount()
+	if err != nil {
+		log.Printf("Error getting total count: %v", err)
+		totalCount = 0
+	}
+
 	data := struct {
 		Jobs          []*models.JobApplication
 		StatusCounts  map[string]int
+		TotalCount    int
 		Statuses      []string
 		CurrentFilter string
 		StatusMessage string
@@ -304,6 +319,7 @@ func (h *Handler) FilterHandler(w http.ResponseWriter, r *http.Request) {
 	}{
 		Jobs:          jobs,
 		StatusCounts:  statusCounts,
+		TotalCount:    totalCount,
 		Statuses:      models.GetCommonStatuses(),
 		CurrentFilter: status,
 		StatusMessage: "",
